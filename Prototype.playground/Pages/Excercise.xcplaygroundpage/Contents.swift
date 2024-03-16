@@ -5,57 +5,7 @@ protocol Clonable: NSCopying {
     func clone() -> Prototype
 }
 
-class Shape: Clonable {
-    func clone() -> Shape {
-        copy() as! Shape
-    }
-
-    var x: Int
-    var y: Int
-
-    init(x: Int, y: Int) {
-        self.x = x
-        self.y = y
-    }
-}
-
-extension Shape: CustomStringConvertible {
-    var description: String {
-        "Shape(x: \(x), y: \(y))"
-    }
-}
-
-extension Shape: NSCopying {
-    func copy(with zone: NSZone? = nil) -> Any {
-        Shape(x: x, y: y)
-    }
-}
-
-class Rectangle: Shape {
-    var area: Int {
-        x * y
-    }
-}
-
-class Triangle: Shape {
-    var area: Int {
-        (x * y) / 2
-    }
-}
-
-let rect = Rectangle.init(x: 0, y: 2)
-
-var shapes = [Shape]()
-for i in 1...100 {
-    let copy = rect.clone()
-    copy.x = i
-    shapes.append(copy)
-}
-
-print(shapes)
-
-
-protocol Vehicle {
+protocol Vehicle: Clonable {
     var speed: Measurement<UnitSpeed> { get }
     func run()
 }
@@ -66,27 +16,65 @@ extension Vehicle {
     }
 }
 
-struct Car: Vehicle {
+class Car: Vehicle {
+    var model: String
     var speed: Measurement<UnitSpeed>
-}
 
-struct Plane: Vehicle {
-    var speed: Measurement<UnitSpeed>
-    
-    func run() {
-        print("This plane flies at \(speed.formatted(.measurement(width: .abbreviated)))")
+    init(model: String, speed: Measurement<UnitSpeed>) {
+        self.model = model
+        self.speed = speed
+    }
+
+    func clone() -> Car {
+        guard let copy = self.copy() as? Car else {
+            fatalError("Provide a default value instead")
+        }
+        return copy
+    }
+
+    func copy(with zone: NSZone? = nil) -> Any {
+        Car(model: model, speed: speed)
     }
 }
 
-let car = Car(speed: .init(value: 200, unit: .kilometersPerHour))
-let plane = Plane(speed: .init(value: 600, unit: .kilometersPerHour))
+class Motorcycle: Vehicle {
+    var maker: String
+    var speed: Measurement<UnitSpeed>
 
-var car2 = car
+    init(maker: String, speed: Measurement<UnitSpeed>) {
+        self.maker = maker
+        self.speed = speed
+    }
 
-car2.speed = .init(value: 100, unit: .milesPerHour)
+    func run() {
+        print("This motorcycle by \(maker) runs at \(speed.formatted(.measurement(width: .abbreviated)))")
+    }
 
-print(plane, car, car2)
-let vehicles: [Vehicle] = [car, car2, plane]
+    func clone() -> Motorcycle {
+        self.copy() as! Motorcycle
+    }
+
+    func copy(with zone: NSZone? = nil) -> Any {
+        Motorcycle(maker: maker, speed: speed)
+    }
+}
+
+let ferrari = Car(
+    model: "F40",
+    speed: .init(value: 200, unit: .kilometersPerHour)
+)
+let plane = Motorcycle(maker: "Harley-Davidson", speed: .init(value: 180, unit: .kilometersPerHour))
+
+let lambo = ferrari.clone()
+
+print(ferrari, lambo)
+
+lambo.model = "Revuelto"
+lambo.speed = .init(value: 300, unit: .kilometersPerHour)
+
+print(ferrari, lambo)
+
+let vehicles: [any Vehicle] = [ferrari, lambo]
 
 vehicles.forEach { vehicle in
     vehicle.run()

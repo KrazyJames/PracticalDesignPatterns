@@ -22,7 +22,7 @@ struct NameStruct {
 var joe = NameStruct.init(firstName: "Joe", lastName: "Doe")
 var maria = joe
 
-print(joe, maria)
+print(joe.firstName, maria.firstName)
 
 maria.firstName = "Maria"
 maria.lastName = "Marques"
