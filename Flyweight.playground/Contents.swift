@@ -8,18 +8,26 @@ import UIKit
 // MARK: - Pitfalls
 /// - Make sure there's only one intrinsic state object (use a flyweight factory or singleton)
 
-class Spaceship {
+
+class SharedSpaceship {
     private let mesh: [Float]
     private let texture: UIImage?
-    private let position: (x: Int, y: Int, z: Int)
 
-    init(
-        mesh: [Float],
-        imageName: String,
-        position: (x: Int, y: Int, z: Int) = (0, 0, 0)
-    ) {
+    init(mesh: [Float], imageName: String) {
         self.mesh = mesh
         self.texture = .init(named: imageName)
+    }
+}
+
+class Spaceship {
+    private let position: (x: Int, y: Int, z: Int)
+    private var intrisicState: SharedSpaceship
+
+    init(
+        sharedData: SharedSpaceship,
+        position: (x: Int, y: Int, z: Int) = (0, 0, 0)
+    ) {
+        self.intrisicState = sharedData
         self.position = position
     }
 }
@@ -28,11 +36,12 @@ let fleetSize = 1_000
 var ships: [Spaceship] = .init()
 var vertices = [Float](repeating: .zero, count: 1_000)
 
-/// Loading 1,000 times the image can cause memory issues
+let sharedData = SharedSpaceship(mesh: vertices, imageName: "Spaceship")
+
+/// Now the same reference to the intrinsic state is used in the 1,000 instances of the Scpaceship, reducing the memory used by loading the texture 1 time
 for _ in 0..<fleetSize {
     let ship = Spaceship(
-        mesh: vertices,
-        imageName: "Spaceship",
+        sharedData: sharedData,
         position: (
             x: Int.random(in: 1..<1_000),
             y: Int.random(in: 1..<1_000),
