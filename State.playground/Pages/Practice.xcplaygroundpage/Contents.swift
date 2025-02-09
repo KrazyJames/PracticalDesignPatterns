@@ -34,14 +34,14 @@ class TrafficLight {
     }
 }
 
-class Black: Light {
+struct Black: Light {
     var color: Color = .black
     func start(trafficLight: TrafficLight) async throws {
         return
     }
 }
 
-class Green: Light {
+struct Green: Light {
     let color: Color = .green
     private let clock = ContinuousClock()
 
@@ -51,7 +51,7 @@ class Green: Light {
     }
 }
 
-class Yellow: Light {
+struct Yellow: Light {
     let color: Color = .yellow
     private let clock = ContinuousClock()
 
@@ -61,7 +61,7 @@ class Yellow: Light {
     }
 }
 
-class Red: Light {
+struct Red: Light {
     let color: Color = .red
     private let clock = ContinuousClock()
 
